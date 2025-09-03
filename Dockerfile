@@ -18,8 +18,9 @@ FROM eclipse-temurin:17-jre-jammy
 
 WORKDIR /app
 
-COPY --from=builder /app/target/notes-backend-0.0.1-SNAPSHOT.jar notes-backend-0.0.1-SNAPSHOT.jar
+COPY --from=builder /app/target/*.jar app.jar
+
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "notes-backend-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
