@@ -1,18 +1,25 @@
-
-FROM eclipse-temurin:17-jdk as build
-
-WORKDIR /app
-COPY . .
-
-
-RUN ./mvnw clean package -DskipTests
-
-
-FROM eclipse-temurin:17-jre
+FROM openjdk:17-jdk-slim as builder
 
 WORKDIR /app
 
-COPY --from=build /app/target/*.jar app.jar
+COPY mvnw .
+COPY .mvn .mvn
+COPY pom.xml .
 
+RUN chmod +x mvnw
 
-ENTRYPOINT ["java","-jar","app.jar"]
+RUN ./mvnw dependency:go-offline
+
+COPY src ./src
+
+RUN ./mvnw clean install -DskipTests
+
+FROM eclipse-temurin:17-jre-jammy
+
+WORKDIR /app
+
+COPY --from=builder /app/target/notes-backend-0.0.1-SNAPSHOT.jar notes-backend-0.0.1-SNAPSHOT.jar
+
+EXPOSE 8080
+
+ENTRYPOINT ["java", "-jar", "notes-backend-0.0.1-SNAPSHOT.jar"]
